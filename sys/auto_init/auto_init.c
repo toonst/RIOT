@@ -76,6 +76,10 @@
 #include "lwip.h"
 #endif
 
+#ifdef MODULE_PICOTCP
+#include "picotcp.h"
+#endif
+
 #ifdef MODULE_FIB
 #include "net/fib.h"
 #endif
@@ -147,6 +151,10 @@ void auto_init(void)
 #ifdef MODULE_LWIP
     DEBUG("Bootstraping lwIP.\n");
     lwip_bootstrap();
+#endif
+#ifdef MODULE_PICOTCP
+    DEBUG("Bootstraping picotcp.\n");
+    picotcp_bootstrap();
 #endif
 #ifdef MODULE_GCOAP
     DEBUG("Auto init gcoap module.\n");

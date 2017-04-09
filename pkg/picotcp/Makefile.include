@@ -14,3 +14,10 @@ endif
 ifneq (,$(filter picotcp_conn_udp,$(USEMODULE)))
   DIRS += $(PICOTCP_CONTRIB)/conn/udp
 endif
+
+ifneq (,$(filter picotcp_contrib,$(USEMODULE)))
+  DIRS += $(RIOTBASE)/pkg/picotcp/contrib
+endif
+ifneq (,$(filter picotcp_netdev2,$(USEMODULE)))
+  DIRS += $(RIOTBASE)/pkg/picotcp/contrib/netdev2
+endif
