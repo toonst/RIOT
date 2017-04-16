@@ -26,7 +26,6 @@ static int _ping(int argc, char **argv)
     (void)argv;
     int id;
 
-    printf("starting ping\n");
     id = pico_icmp4_ping("192.168.5.5", NUM_PING, 1000, 10000, 64, _cb_ping);
 
     if (id == -1) {

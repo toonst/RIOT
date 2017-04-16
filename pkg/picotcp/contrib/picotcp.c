@@ -31,7 +31,6 @@
 
 #define PICOTCP_STACKSIZE  (THREAD_STACKSIZE_DEFAULT)
 #define PICOTCP_PRIO       (THREAD_PRIORITY_MAIN - 3)
-#define PICOTCP_DELAY      (500)
 
 #ifdef MODULE_NETDEV2_TAP
 static struct pico_device pico_dev;
@@ -58,7 +57,6 @@ void picotcp_bootstrap(void)
     int ret;
     struct pico_ip4 ipaddr, netmask;
 
-    dbg("Starting picotcp_bootstrap\n");
     /* initialize the stack */
     pico_stack_init();
 
@@ -72,6 +70,8 @@ void picotcp_bootstrap(void)
 #error "No netdev included"
 #endif
 
+    //TODO: link creation should probably be done
+    //      on application level
     /* assign the IP address to the tap interface */
     pico_string_to_ipv4("192.168.5.4", &ipaddr.addr);
     pico_string_to_ipv4("255.255.255.0", &netmask.addr);

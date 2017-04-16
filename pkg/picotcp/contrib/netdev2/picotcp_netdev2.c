@@ -46,25 +46,28 @@ static void _event_cb(netdev2_t *dev, netdev2_event_t event);
 static void *_event_loop(void *arg);
 
 static int _link_state;
+static netdev2_t *_global_netdev;
 
 static netdev2_t *_get_netdev(struct pico_device *pico_dev)
 {
-    //TODO: verify this typecast
-    return container_of((void *)pico_dev, netdev2_t, context);
+    //TODO use clean method of retreiving netdev
+    //return container_of((void *)pico_dev, netdev2_t, context);
+    (void) pico_dev;
+    return _global_netdev;
 }
 
 /* Send function. Return 0 if busy */
 static int _netdev2_send(struct pico_device *pico_dev, void *buf, int len)
 {
     struct iovec vector;
-    unsigned count = 1; //TODO right amount?
+    unsigned int count = 1; //TODO right amount?
     netdev2_t *dev = _get_netdev(pico_dev);
 
     vector.iov_base = buf;
     vector.iov_len = (size_t)len;
 
     len = dev->driver->send(dev, &vector, count);
-    return 0;
+    return 1;
 }
 
 static int _netdev2_dsr(struct pico_device *pico_dev, int loop_score)
@@ -176,6 +179,8 @@ int picotcp_netdev2_init(netdev2_t *netdev, struct pico_device *pico_dev)
             return -1;
         }
     }
+    //TODO: remove
+    _global_netdev = netdev;
 
     /* initialize netdev */
     netdev->driver->init(netdev);
