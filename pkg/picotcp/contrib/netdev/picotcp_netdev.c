@@ -46,22 +46,13 @@ static void _event_cb(netdev_t *dev, netdev_event_t event);
 static void *_event_loop(void *arg);
 
 static int _link_state;
-static netdev_t *_global_netdev;
-
-static netdev_t *_get_netdev(struct pico_device *pico_dev)
-{
-    //TODO use clean method of retreiving netdev
-    //return container_of((void *)pico_dev, netdev_t, context);
-    (void) pico_dev;
-    return _global_netdev;
-}
 
 /* Send function. Return 0 if busy */
 static int _netdev_send(struct pico_device *pico_dev, void *buf, int len)
 {
     struct iovec vector;
     unsigned int count = 1; //TODO right amount?
-    netdev_t *dev = _get_netdev(pico_dev);
+    netdev_t *dev = (netdev_t *)pico_dev->context;
 
     vector.iov_base = buf;
     vector.iov_len = (size_t)len;
@@ -72,7 +63,7 @@ static int _netdev_send(struct pico_device *pico_dev, void *buf, int len)
 
 static int _netdev_dsr(struct pico_device *pico_dev, int loop_score)
 {
-    netdev_t *dev = _get_netdev(pico_dev);
+    netdev_t *dev = (netdev_t *)pico_dev->context;
     (void) loop_score;
     int len;
 
@@ -87,14 +78,14 @@ static int _netdev_dsr(struct pico_device *pico_dev, int loop_score)
 
 static int _netdev_link_state(struct pico_device *pico_dev)
 {
-    netdev_t *dev = _get_netdev(pico_dev);
+    netdev_t *dev = (netdev_t *)pico_dev->context;
     (void) dev;
     return _link_state;
 }
 
 static void _netdev_destroy(struct pico_device *pico_dev)
 {
-    netdev_t *dev = _get_netdev(pico_dev);
+    netdev_t *dev = (netdev_t *)pico_dev->context;
     (void) dev;
     //TODO: clean up
 }
@@ -179,8 +170,8 @@ int picotcp_netdev_init(netdev_t *netdev, struct pico_device *pico_dev)
             return -1;
         }
     }
-    //TODO: remove
-    _global_netdev = netdev;
+
+    pico_dev->context = netdev;
 
     /* initialize netdev */
     netdev->driver->init(netdev);
@@ -216,7 +207,6 @@ int picotcp_netdev_init(netdev_t *netdev, struct pico_device *pico_dev)
     /* initialize pico_device */
     if( 0 != pico_device_init(pico_dev, "pico_netdev", mac)) {
         dbg("Device init failed.\n");
-        //PICO_FREE(eth_dev);
         return -1;
     }
 

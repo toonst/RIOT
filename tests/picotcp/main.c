@@ -16,7 +16,6 @@ void _cb_ping(struct pico_icmp4_stats *s)
         printf("%lu bytes from %s: icmp_req=%lu ttl=%lu time=%lu ms\n", s->size,
                 host, s->seq, s->ttl, (long unsigned int)s->time);
     } else {
-        /* if something went wrong, print it and signal we want to stop */
         printf("PING %lu to %s: Error %d\n", s->seq, host, s->err);
     }
 }

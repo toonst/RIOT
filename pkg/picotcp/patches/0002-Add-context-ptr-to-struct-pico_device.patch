@@ -1,0 +1,25 @@
+From 0fd84c44f42adeae05fef2240a1dc6379c5e6ebc Mon Sep 17 00:00:00 2001
+From: Toon Stegen <toon.stegen@altran.com>
+Date: Tue, 18 Apr 2017 02:01:36 -0500
+Subject: [PATCH] Add context ptr to struct pico_device
+
+This is used for storing the netdev_t device.
+---
+ include/pico_device.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/include/pico_device.h b/include/pico_device.h
+index 20d6f5d0..b1417fdf 100644
+--- a/include/pico_device.h
++++ b/include/pico_device.h
+@@ -37,6 +37,7 @@ struct pico_device {
+   #ifdef PICO_SUPPORT_IPV6
+     struct pico_nd_hostvars hostvars;
+   #endif
++    void *context;
+ };
+ 
+ 
+-- 
+2.12.1
+
