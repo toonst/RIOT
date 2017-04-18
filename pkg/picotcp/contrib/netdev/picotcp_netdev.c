@@ -18,50 +18,50 @@
 #include <inttypes.h>
 
 #include "net/ieee802154.h"
-#include "net/netdev2.h"
+#include "net/netdev.h"
 #include "net/netopt.h"
 #include "utlist.h"
 #include "thread.h"
 #include "kernel_defines.h"
 
-#include "picotcp/netdev2.h"
+#include "picotcp/netdev.h"
 
 #include "pico_stack.h"
 
 #define ENABLE_DEBUG                (1)
 #include "debug.h"
 
-#define PICOTCP_NETDEV2_NAME           "picotcp_netdev2_mux"
-#define PICOTCP_NETDEV2_PRIO           (THREAD_PRIORITY_MAIN - 4)
-#define PICOTCP_NETDEV2_STACKSIZE      (THREAD_STACKSIZE_DEFAULT)
-#define PICOTCP_NETDEV2_QUEUE_LEN      (8)
-#define PICOTCP_NETDEV2_MSG_TYPE_EVENT 0x1235
+#define PICOTCP_NETDEV_NAME           "picotcp_netdev_mux"
+#define PICOTCP_NETDEV_PRIO           (THREAD_PRIORITY_MAIN - 4)
+#define PICOTCP_NETDEV_STACKSIZE      (THREAD_STACKSIZE_DEFAULT)
+#define PICOTCP_NETDEV_QUEUE_LEN      (8)
+#define PICOTCP_NETDEV_MSG_TYPE_EVENT 0x1235
 
 static kernel_pid_t _pid = KERNEL_PID_UNDEF;
-static char _stack[PICOTCP_NETDEV2_STACKSIZE];
-static msg_t _queue[PICOTCP_NETDEV2_QUEUE_LEN];
-static uint8_t _tmp_buf[PICOTCP_NETDEV2_BUFLEN];
+static char _stack[PICOTCP_NETDEV_STACKSIZE];
+static msg_t _queue[PICOTCP_NETDEV_QUEUE_LEN];
+static uint8_t _tmp_buf[PICOTCP_NETDEV_BUFLEN];
 
-static void _event_cb(netdev2_t *dev, netdev2_event_t event);
+static void _event_cb(netdev_t *dev, netdev_event_t event);
 static void *_event_loop(void *arg);
 
 static int _link_state;
-static netdev2_t *_global_netdev;
+static netdev_t *_global_netdev;
 
-static netdev2_t *_get_netdev(struct pico_device *pico_dev)
+static netdev_t *_get_netdev(struct pico_device *pico_dev)
 {
     //TODO use clean method of retreiving netdev
-    //return container_of((void *)pico_dev, netdev2_t, context);
+    //return container_of((void *)pico_dev, netdev_t, context);
     (void) pico_dev;
     return _global_netdev;
 }
 
 /* Send function. Return 0 if busy */
-static int _netdev2_send(struct pico_device *pico_dev, void *buf, int len)
+static int _netdev_send(struct pico_device *pico_dev, void *buf, int len)
 {
     struct iovec vector;
     unsigned int count = 1; //TODO right amount?
-    netdev2_t *dev = _get_netdev(pico_dev);
+    netdev_t *dev = _get_netdev(pico_dev);
 
     vector.iov_base = buf;
     vector.iov_len = (size_t)len;
@@ -70,9 +70,9 @@ static int _netdev2_send(struct pico_device *pico_dev, void *buf, int len)
     return 1;
 }
 
-static int _netdev2_dsr(struct pico_device *pico_dev, int loop_score)
+static int _netdev_dsr(struct pico_device *pico_dev, int loop_score)
 {
-    netdev2_t *dev = _get_netdev(pico_dev);
+    netdev_t *dev = _get_netdev(pico_dev);
     (void) loop_score;
     int len;
 
@@ -85,62 +85,62 @@ static int _netdev2_dsr(struct pico_device *pico_dev, int loop_score)
     return 0;
 }
 
-static int _netdev2_link_state(struct pico_device *pico_dev)
+static int _netdev_link_state(struct pico_device *pico_dev)
 {
-    netdev2_t *dev = _get_netdev(pico_dev);
+    netdev_t *dev = _get_netdev(pico_dev);
     (void) dev;
     return _link_state;
 }
 
-static void _netdev2_destroy(struct pico_device *pico_dev)
+static void _netdev_destroy(struct pico_device *pico_dev)
 {
-    netdev2_t *dev = _get_netdev(pico_dev);
+    netdev_t *dev = _get_netdev(pico_dev);
     (void) dev;
     //TODO: clean up
 }
 
-static void _event_cb(netdev2_t *dev, netdev2_event_t event)
+static void _event_cb(netdev_t *dev, netdev_event_t event)
 {
     struct pico_device * pico_dev = (struct pico_device *) dev->context;
 
-    if (event == NETDEV2_EVENT_ISR) {
+    if (event == NETDEV_EVENT_ISR) {
         /* driver needs it's ISR handled */
         msg_t msg;
 
-        msg.type = PICOTCP_NETDEV2_MSG_TYPE_EVENT;
+        msg.type = PICOTCP_NETDEV_MSG_TYPE_EVENT;
         msg.content.ptr = (char *)dev;
 
         if (msg_send(&msg, _pid) <= 0) {
-            DEBUG("picotcp_netdev2: possibly lost interrupt.\n");
+            DEBUG("picotcp_netdev: possibly lost interrupt.\n");
         }
     }
     switch(event) {
-        case NETDEV2_EVENT_RX_STARTED:
+        case NETDEV_EVENT_RX_STARTED:
             /* started to receive a packet */
         break;
-        case NETDEV2_EVENT_RX_COMPLETE:
+        case NETDEV_EVENT_RX_COMPLETE:
             /* finished receiving a packet */
             // TODO: lock
             pico_dev->__serving_interrupt = 1;
 
         break;
-        case NETDEV2_EVENT_TX_STARTED:
+        case NETDEV_EVENT_TX_STARTED:
             /* started to transfer a packet */
         break;
-        case NETDEV2_EVENT_TX_COMPLETE:
+        case NETDEV_EVENT_TX_COMPLETE:
             /* finished transferring packet */
         break;
-        case NETDEV2_EVENT_TX_NOACK:
+        case NETDEV_EVENT_TX_NOACK:
             /* ACK requested but not received */
         break;
-        case NETDEV2_EVENT_TX_MEDIUM_BUSY:
+        case NETDEV_EVENT_TX_MEDIUM_BUSY:
             /* couldn't transfer packet */
         break;
-        case NETDEV2_EVENT_LINK_UP:
+        case NETDEV_EVENT_LINK_UP:
             /* link established */
             _link_state = 1;
         break;
-        case NETDEV2_EVENT_LINK_DOWN:
+        case NETDEV_EVENT_LINK_DOWN:
             /* link gone */
             _link_state = 0;
         break;
@@ -152,28 +152,28 @@ static void _event_cb(netdev2_t *dev, netdev2_event_t event)
 static void *_event_loop(void *arg)
 {
     (void)arg;
-    msg_init_queue(_queue, PICOTCP_NETDEV2_QUEUE_LEN);
+    msg_init_queue(_queue, PICOTCP_NETDEV_QUEUE_LEN);
     while (1) {
         msg_t msg;
         msg_receive(&msg);
-        if (msg.type == PICOTCP_NETDEV2_MSG_TYPE_EVENT) {
-            netdev2_t *dev = (netdev2_t *)msg.content.ptr;
+        if (msg.type == PICOTCP_NETDEV_MSG_TYPE_EVENT) {
+            netdev_t *dev = (netdev_t *)msg.content.ptr;
             dev->driver->isr(dev);
         }
     }
     return NULL;
 }
 
-int picotcp_netdev2_init(netdev2_t *netdev, struct pico_device *pico_dev)
+int picotcp_netdev_init(netdev_t *netdev, struct pico_device *pico_dev)
 {
     uint16_t dev_type;
     uint8_t mac[ETHERNET_ADDR_LEN] = {0};
 
     /* start multiplexing thread (only one needed) */
     if (_pid <= KERNEL_PID_UNDEF) {
-        _pid = thread_create(_stack, PICOTCP_NETDEV2_STACKSIZE, PICOTCP_NETDEV2_PRIO,
+        _pid = thread_create(_stack, PICOTCP_NETDEV_STACKSIZE, PICOTCP_NETDEV_PRIO,
                              THREAD_CREATE_STACKTEST, _event_loop, NULL,
-                             PICOTCP_NETDEV2_NAME);
+                             PICOTCP_NETDEV_NAME);
         if (_pid <= 0) {
             dbg("Thread creation failed\n");
             return -1;
@@ -194,8 +194,8 @@ int picotcp_netdev2_init(netdev2_t *netdev, struct pico_device *pico_dev)
     }
 
     switch (dev_type) {
-#ifdef MODULE_NETDEV2_ETH
-        case NETDEV2_TYPE_ETHERNET:
+#ifdef MODULE_NETDEV_ETH
+        case NETDEV_TYPE_ETHERNET:
             /* retreive mac address */
             if (netdev->driver->get(netdev, NETOPT_ADDRESS, &mac,
                         ETHERNET_ADDR_LEN) < 0) {
@@ -204,10 +204,10 @@ int picotcp_netdev2_init(netdev2_t *netdev, struct pico_device *pico_dev)
             }
             break;
 #endif
-        case NETDEV2_TYPE_UNKNOWN:
-        case NETDEV2_TYPE_RAW:
-        case NETDEV2_TYPE_IEEE802154:
-        case NETDEV2_TYPE_CC110X:
+        case NETDEV_TYPE_UNKNOWN:
+        case NETDEV_TYPE_RAW:
+        case NETDEV_TYPE_IEEE802154:
+        case NETDEV_TYPE_CC110X:
         default:
             dbg("device type not supported yet\n");
             return -1;
@@ -220,10 +220,10 @@ int picotcp_netdev2_init(netdev2_t *netdev, struct pico_device *pico_dev)
         return -1;
     }
 
-    pico_dev->send = _netdev2_send;
-    pico_dev->dsr = _netdev2_dsr;
-    pico_dev->destroy = _netdev2_destroy;
-    pico_dev->link_state = _netdev2_link_state;
+    pico_dev->send = _netdev_send;
+    pico_dev->dsr = _netdev_dsr;
+    pico_dev->destroy = _netdev_destroy;
+    pico_dev->link_state = _netdev_link_state;
 
     return 0;
 }

@@ -7,21 +7,21 @@
  */
 
 /**
- * @defgroup    pkg_picotcp_netdev2    picoTCP netdev2 adapter
+ * @defgroup    pkg_picotcp_netdev    picoTCP netdev adapter
  * @ingroup     pkg_picotcp
- * @brief       netdev2 adapter for picoTCP
+ * @brief       netdev adapter for picoTCP
  * @{
  *
  * @file
- * @brief   picoTCP netdev2 adapter definitions
+ * @brief   picoTCP netdev adapter definitions
  *
  * @author  Toon Stegen <toonstegen@hotmail.com>
  */
-#ifndef NETDEV2_H_
-#define NETDEV2_H_
+#ifndef NETDEV_H_
+#define NETDEV_H_
 
 #include "net/ethernet.h"
-#include "net/netdev2.h"
+#include "net/netdev.h"
 
 #include "pico_device.h"
 
@@ -33,12 +33,12 @@ extern "C" {
  * @brief   Length of the temporary copying buffer for receival.
  * @note    It should be as long as the maximum packet length of all the netdev you use.
  */
-#ifndef PICOTCP_NETDEV2_BUFLEN
-#define PICOTCP_NETDEV2_BUFLEN     (ETHERNET_MAX_LEN)
+#ifndef PICOTCP_NETDEV_BUFLEN
+#define PICOTCP_NETDEV_BUFLEN     (ETHERNET_MAX_LEN)
 #endif
 
 /**
- * @brief   Initializes the netdev2 adapter.
+ * @brief   Initializes the netdev adapter.
  *
  * @param[in] netdev The netdev device for initialisation
  * @param[in] pico_dev The pico_device for initialisation
@@ -46,11 +46,11 @@ extern "C" {
  * @return  0 on success.
  * @return  -1 on error.
  */
-int picotcp_netdev2_init(netdev2_t *netdev, struct pico_device *pico_dev);
+int picotcp_netdev_init(netdev_t *netdev, struct pico_device *pico_dev);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* NETDEV2_H_ */
+#endif /* NETDEV_H_ */
 /** @} */

@@ -18,6 +18,6 @@ endif
 ifneq (,$(filter picotcp_contrib,$(USEMODULE)))
   DIRS += $(RIOTBASE)/pkg/picotcp/contrib
 endif
-ifneq (,$(filter picotcp_netdev2,$(USEMODULE)))
-  DIRS += $(RIOTBASE)/pkg/picotcp/contrib/netdev2
+ifneq (,$(filter picotcp_netdev,$(USEMODULE)))
+  DIRS += $(RIOTBASE)/pkg/picotcp/contrib/netdev
 endif

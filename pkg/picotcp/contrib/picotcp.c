@@ -17,13 +17,13 @@
 #include "xtimer.h"
 
 #include "picotcp.h"
-#include "picotcp/netdev2.h"
+#include "picotcp/netdev.h"
 
 #include "pico_stack.h"
 #include "pico_ipv4.h"
 
-#ifdef MODULE_NETDEV2_TAP
-#include "netdev2_tap.h"
+#ifdef MODULE_NETDEV_TAP
+#include "netdev_tap.h"
 #endif
 
 #define ENABLE_DEBUG    (1)
@@ -32,7 +32,7 @@
 #define PICOTCP_STACKSIZE  (THREAD_STACKSIZE_DEFAULT)
 #define PICOTCP_PRIO       (THREAD_PRIORITY_MAIN - 3)
 
-#ifdef MODULE_NETDEV2_TAP
+#ifdef MODULE_NETDEV_TAP
 static struct pico_device pico_dev;
 #endif
 
@@ -60,8 +60,8 @@ void picotcp_bootstrap(void)
     /* initialize the stack */
     pico_stack_init();
 
-#ifdef MODULE_NETDEV2_TAP
-    ret = picotcp_netdev2_init(&netdev2_tap.netdev, &pico_dev);
+#ifdef MODULE_NETDEV_TAP
+    ret = picotcp_netdev_init(&netdev_tap.netdev, &pico_dev);
     if(ret) {
         dbg("Error initializing picotcp_netdev\n");
         return;
