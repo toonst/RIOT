@@ -1,32 +1,28 @@
-/*
- * Copyright (C) 2014 Freie Universität Berlin
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
- */
+#include <stdint.h>
+#include "board.h"
+#include "xtimer.h"
+#include "saul_reg.h"
 
-/**
- * @ingroup     examples
- * @{
- *
- * @file
- * @brief       Hello World application
- *
- * @author      Kaspar Schleiser <kaspar@schleiser.de>
- * @author      Ludwig Knüpfer <ludwig.knuepfer@fu-berlin.de>
- *
- * @}
- */
-
-#include <stdio.h>
+#define BUTTON_PUSHED 1
+#define BUTTON_RELEASED 0
 
 int main(void)
 {
-    puts("Hello World!");
+    puts("Hello Nalys!");
+    xtimer_init();
 
-    printf("You are running RIOT on a(n) %s board.\n", RIOT_BOARD);
-    printf("This board features a(n) %s MCU.\n", RIOT_MCU);
+    saul_reg_t *button = saul_reg_find_name("WAKE_UP_BUTTON");
 
-    return 0;
+    while(true) {
+        xtimer_usleep(200000);
+        phydat_t data;
+        int ret = saul_reg_read(button, &data);
+        if (ret < 0) {
+            puts("Error reading button");
+        }
+        if (data.val[0] == BUTTON_PUSHED) {
+            LED0_TOGGLE;
+            puts("Toggle");
+        }
+    }
 }
