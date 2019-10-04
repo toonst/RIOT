@@ -56,6 +56,13 @@ extern "C" {
 /** @} */
 
 /**
+ * @name STDIO uart definition. UEXT connector by default, use UART_DEV(0) for RS232 connector
+ * @{
+ */
+#define STDIO_UART_DEV          UART_DEV(1)
+/** @} */
+
+/**
  * @brief   Initialize board specific hardware, including clock, LEDs and std-IO
  */
 void board_init(void);
