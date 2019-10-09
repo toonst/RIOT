@@ -1,3 +1,7 @@
+# define the cpu used by the olimex-stm32-p405 board
+CPU = stm32f4
+CPU_MODEL = stm32f405rg
+
 # Put defined MCU peripherals here (in alphabetical order)
 FEATURES_PROVIDED += periph_adc
 FEATURES_PROVIDED += periph_i2c
@@ -9,7 +13,3 @@ FEATURES_PROVIDED += periph_timer
 FEATURES_PROVIDED += periph_uart
 FEATURES_PROVIDED += periph_qdec
 
-# The board MPU family (used for grouping by the CI system)
-# FEATURES_MCU_GROUP = cortex_m4_3
-
--include $(RIOTCPU)/stm32f4/Makefile.features
