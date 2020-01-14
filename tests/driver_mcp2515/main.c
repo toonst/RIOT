@@ -41,12 +41,31 @@
 static candev_mcp2515_t dev;
 struct can_bittiming timing;
 
+#define CS_PIN GPIO_PIN(PORT_B, 4)
+#define RST_PIN GPIO_PIN(PORT_B, 2)
+#define INT_PIN GPIO_PIN(PORT_B, 3)
+
 static const candev_mcp2515_conf_t conf = {
-    .spi = SPI_1,
-    .cs_pin = CAN2_SS_PIN,
-    .rst_pin = CAN2_RST_PIN,
-    .int_pin = CAN2_INT_PIN,
+    .spi = SPI_DEV(0),
+    .cs_pin = CS_PIN,
+    .rst_pin = RST_PIN,
+    .int_pin = INT_PIN,
 };
+
+static int _send(int argc, char **argv) 
+{
+    (void) argc;
+    (void) argv;
+
+    candev_mcp2515_t dev;
+
+    mcp2515_send(&dev, frame, 0);
+
+
+
+
+    return 0;
+}
 
 
 static const shell_command_t shell_commands[] = {
