@@ -166,7 +166,7 @@ int mcp2515_receive(candev_mcp2515_t *dev, struct can_frame *frame, int mailbox)
 
     /* extended id */
     if (inbuf[1] & MCP2515_RX_IDE) {
-        frame->can_id = (inbuf[0] << 21) +
+        frame->can_id = ((uint32_t)inbuf[0] << 21) +
            (((uint32_t)inbuf[1] & 0xE0) << 13) +
            (((uint32_t)inbuf[1] & 0x03) << 16) +
            ((uint32_t)inbuf[2] << 8) +

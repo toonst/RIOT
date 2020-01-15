@@ -32,7 +32,7 @@
 #include "sched.h"
 #include "mutex.h"
 
-#define ENABLE_DEBUG (0)
+#define ENABLE_DEBUG (1)
 #include "debug.h"
 
 #define MAILBOX_USED 1
@@ -41,7 +41,9 @@
 #define MAILBOX_TO_INTR(mailbox) (INT_RX0 + (mailbox))
 
 #ifndef CANDEV_MCP2515_DEFAULT_BITRATE
-#define CANDEV_MCP2515_DEFAULT_BITRATE 500000
+//#define CANDEV_MCP2515_DEFAULT_BITRATE 125000
+//#define CANDEV_MCP2515_DEFAULT_BITRATE 500000
+#define CANDEV_MCP2515_DEFAULT_BITRATE 100000
 #endif
 
 #ifndef CANDEV_MCP2515_DEFAULT_SPT
