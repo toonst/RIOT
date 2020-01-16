@@ -170,7 +170,9 @@ static int _send(candev_t *candev, const struct can_frame *frame)
 
     dev->tx_mailbox[box] = frame;
 
-    mcp2515_send(dev, frame, box);
+    if (mcp2515_send(dev, frame, box) < 0) {
+        DEBUG("Error while sending\n");
+    }
 
     return box;
 }
