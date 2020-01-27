@@ -79,6 +79,44 @@ static const shell_command_t shell_commands[] = {
     { NULL, NULL, NULL }
 };
 
+static void _can_event_callback(candev_t *dev, candev_event_t event, void *arg)
+{
+    (void) arg;
+
+    switch (event) {
+    case CANDEV_EVENT_ISR:
+        DEBUG("_can_event: CANDEV_EVENT_ISR\n");
+        break;
+    case CANDEV_EVENT_WAKE_UP:
+        DEBUG("_can_event: CANDEV_EVENT_WAKE_UP\n");
+        break;
+    case CANDEV_EVENT_TX_CONFIRMATION:
+        DEBUG("_can_event: CANDEV_EVENT_TX_CONFIRMATION\n");
+        break;
+    case CANDEV_EVENT_TX_ERROR:
+        DEBUG("_can_event: CANDEV_EVENT_TX_ERROR\n");
+        break;
+    case CANDEV_EVENT_RX_INDICATION:
+        DEBUG("_can_event: CANDEV_EVENT_RX_INDICATION\n");
+        break;
+    case CANDEV_EVENT_RX_ERROR:
+        DEBUG("_can_event: CANDEV_EVENT_RX_ERROR\n");
+        break;
+    case CANDEV_EVENT_BUS_OFF:
+        dev->state = CAN_STATE_BUS_OFF;
+        break;
+    case CANDEV_EVENT_ERROR_PASSIVE:
+        dev->state = CAN_STATE_ERROR_PASSIVE;
+        break;
+    case CANDEV_EVENT_ERROR_WARNING:
+        dev->state = CAN_STATE_ERROR_WARNING;
+        break;
+    default:
+        DEBUG("_can_event: unknown event\n");
+        break;
+    }
+}
+
 int main(void)
 {
     puts("candev test application\n");
@@ -92,6 +130,9 @@ int main(void)
 #endif
 
     assert(candev);
+
+    candev->event_callback = _can_event_callback;
+    candev->isr_arg = NULL;
 
     candev->driver->init(candev);
 
